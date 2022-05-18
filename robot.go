@@ -67,6 +67,15 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 	switch cmd {
 	case "/hello":
 		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Content: "你好"})
+	case "/世界时间":
+		context.TODO()
+	case "/当前时间":
+		curtime := getNowTimeofBEIJIN()
+		if curtime != nil {
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateArkByCurrentTime(curtime)})
+		}
+	case "/计时":
+	case "/提醒":
 	}
 	return nil
 }
