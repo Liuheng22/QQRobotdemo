@@ -72,12 +72,14 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 	cmd := res.Cmd
 	content := res.Content
 	switch cmd {
-	case "/hello":
+	case "/帮助":
 		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Content: "你好"})
 	case "/世界时间":
 		globaltime := getTimeofGlobalCity(content)
 		if globaltime != nil {
 			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateArkByGlobalTime(globaltime)})
+		} else {
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("请正确输入城市名称！！！")})
 		}
 	case "/当前时间":
 		curtime := getNowTimeofBEIJIN()
@@ -88,7 +90,7 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 		key, val := CreateKVforStore(data.Author.ID, content)
 		err := db.Put(key, val)
 		if err != nil {
-			log.Println("添加日志错误")
+			log.Println("添加日志错误，err = ", err)
 			return nil
 		}
 		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("成功添加！！！")})
@@ -96,6 +98,7 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 		key, err := CreateKeyforQuery(data.Author.ID, content)
 		DPrintf("%v", key)
 		if err != nil {
+			log.Println("日志查询错误，err = ", err)
 			return nil
 		}
 		val, _ := db.Get(key)
@@ -110,10 +113,12 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 	case "/日志删除":
 		key, err := CreateKeyforQuery(data.Author.ID, content)
 		if err != nil {
+			log.Println("创建Key出错，err = ", err)
 			return nil
 		}
 		err = db.Del(key)
 		if err != nil {
+			log.Println("db删除Key = ", key, " 出错，err = ", err)
 			return nil
 		}
 		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("成功删除！！！")})
