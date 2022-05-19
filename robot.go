@@ -73,6 +73,16 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 	content := res.Content
 	switch cmd {
 	case "/帮助":
+		switch content {
+		case "":
+		case "世界时间":
+		case "当前时间":
+		case "添加日志":
+		case "日志查询":
+		case "日志删除":
+		default:
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("请正确输入指令！！！")})
+		}
 		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Content: "你好"})
 	case "/世界时间":
 		globaltime := getTimeofGlobalCity(content)
