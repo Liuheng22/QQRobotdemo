@@ -23,6 +23,7 @@ var config Config
 var api openapi.OpenAPI
 var ctx context.Context
 var citynames map[string]string
+var db Storerage
 
 // 配置加载
 func init() {
@@ -39,8 +40,11 @@ func init() {
 	if flag == "all" || flag == "config" {
 		DPrintf("配置文件为:%v", config)
 	}
+
 	citynames = make(map[string]string)
 	getAllCityData(citynames)
+
+	db = &MemKV{KV: make(map[string][]string)}
 }
 
 func main() {
@@ -80,6 +84,39 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 		if curtime != nil {
 			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateArkByCurrentTime(curtime)})
 		}
+	case "/添加日志":
+		key, val := CreateKVforStore(data.Author.ID, content)
+		err := db.Put(key, val)
+		if err != nil {
+			log.Println("添加日志错误")
+			return nil
+		}
+		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("成功添加！！！")})
+	case "/日志查询":
+		key, err := CreateKeyforQuery(data.Author.ID, content)
+		DPrintf("%v", key)
+		if err != nil {
+			return nil
+		}
+		val, _ := db.Get(key)
+		if flag == "all" || flag == "log" {
+			DPrintf("%v", val)
+		}
+		directMsg, _ := api.CreateDirectMessage(ctx, &dto.DirectMessageToCreate{
+			SourceGuildID: data.GuildID,
+			RecipientID:   data.Author.ID,
+		})
+		api.PostDirectMessage(ctx, directMsg, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateQueryResult(val, content)})
+	case "/日志删除":
+		key, err := CreateKeyforQuery(data.Author.ID, content)
+		if err != nil {
+			return nil
+		}
+		err = db.Del(key)
+		if err != nil {
+			return nil
+		}
+		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("成功删除！！！")})
 	case "/计时":
 	case "/提醒":
 	}

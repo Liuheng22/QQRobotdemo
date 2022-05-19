@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"regexp"
+	"strings"
 
 	"github.com/tencent-connect/botgo/dto"
 )
@@ -88,4 +89,49 @@ func CreateArkByGlobalTime(globaltime *GlobaltimeResp) *dto.Ark {
 func StrAllLetter(str string) bool {
 	match, _ := regexp.MatchString(`^[A-Za-z]+$`, str)
 	return match
+}
+
+//创建当天需要存储的kv对
+//使用userid + 当前日期作为key，中间加" "作为分隔，便于后期切分
+//使用当前时间+content作为val，中间加:,便于后面输出日志排版
+func CreateKVforStore(user string, content string) (key string, val string) {
+	curtime := getNowTimeofBEIJIN()
+	if flag == "all" || flag == "log" {
+		DPrintf("%v+%d", curtime.Data.Datetime, len(curtime.Data.Datetime))
+	}
+	s := strings.Split(curtime.Data.Datetime, " ")
+	if flag == "all" || flag == "log" {
+		DPrintf("%v+%v+%d", s[0], s[1], len(s))
+	}
+	key = user + " " + s[0]
+	val = s[1] + ": " + content
+	if flag == "all" || flag == "log" {
+		DPrintf("{key:%v},{val:%v}", key, val)
+	}
+	return key, val
+}
+
+//创建成功的Ark
+func CreateSuccessArk(msg string) *dto.Ark {
+	return NewArk(23,
+		NewArkKV("#DESC#", "描述"),
+		NewArkKV("#PROMPT#", "提示信息"),
+		NewArkKObj("#LIST#",
+			NewArkObjKV("desc", msg)))
+}
+
+//创建用于查询的key
+func CreateKeyforQuery(user string, content string) (string, error) {
+	key := user + " " + content
+	return key, nil
+}
+
+//创建查询结果的Ark
+func CreateQueryResult(val []string, date string) *dto.Ark {
+	logs := make([]*dto.ArkObjKV, len(val)+1)
+	logs[0] = NewArkObjKV("desc", date+"日志")
+	for i, v := range val {
+		logs[i+1] = NewArkObjKV("desc", v)
+	}
+	return NewArk(23, NewArkKObj("#LIST#", logs...))
 }

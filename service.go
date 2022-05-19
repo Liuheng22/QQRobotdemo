@@ -55,7 +55,6 @@ func getAllCityData(citynames map[string]string) {
 	for _, cityname := range citydatas.Result.Data {
 		citynames[cityname.CityCn] = cityname.CityEn
 	}
-	return
 }
 
 //获取当前的北京时间
