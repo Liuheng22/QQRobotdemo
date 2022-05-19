@@ -75,15 +75,20 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 	case "/帮助":
 		switch content {
 		case "":
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: ShowDefaultManul("")})
 		case "世界时间":
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: ShowCommandManul("世界时间")})
 		case "当前时间":
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: ShowCommandManul("当前时间")})
 		case "添加日志":
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: ShowCommandManul("添加日志")})
 		case "日志查询":
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: ShowCommandManul("日志查询")})
 		case "日志删除":
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: ShowCommandManul("日志删除")})
 		default:
-			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("请正确输入指令！！！")})
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: ShowDefaultManul("请输入正确指令！！！")})
 		}
-		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Content: "你好"})
 	case "/世界时间":
 		globaltime := getTimeofGlobalCity(content)
 		if globaltime != nil {
@@ -134,6 +139,8 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("成功删除！！！")})
 	case "/计时":
 	case "/提醒":
+	default:
+		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("请输入正确指令！")})
 	}
 	return nil
 }
