@@ -22,6 +22,7 @@ const ConfigPath = "config.yaml" //配置文件
 var config Config
 var api openapi.OpenAPI
 var ctx context.Context
+var citynames map[string]string
 
 // 配置加载
 func init() {
@@ -38,6 +39,8 @@ func init() {
 	if flag == "all" || flag == "config" {
 		DPrintf("配置文件为:%v", config)
 	}
+	citynames = make(map[string]string)
+	getAllCityData(citynames)
 }
 
 func main() {
@@ -63,12 +66,15 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 		DPrintf("cmd解析:%v", res)
 	}
 	cmd := res.Cmd
-	// content := res.Content
+	content := res.Content
 	switch cmd {
 	case "/hello":
 		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Content: "你好"})
 	case "/世界时间":
-		context.TODO()
+		globaltime := getTimeofGlobalCity(content)
+		if globaltime != nil {
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateArkByGlobalTime(globaltime)})
+		}
 	case "/当前时间":
 		curtime := getNowTimeofBEIJIN()
 		if curtime != nil {

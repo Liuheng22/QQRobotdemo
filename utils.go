@@ -2,13 +2,14 @@ package main
 
 import (
 	"log"
+	"regexp"
 
 	"github.com/tencent-connect/botgo/dto"
 )
 
 // Debugging
-const Debug = false
-const flag = ""
+const Debug = true
+const flag = "all"
 
 func DPrintf(format string, a ...interface{}) (n int, err error) {
 	if Debug {
@@ -70,4 +71,21 @@ func CreateArkByCurrentTime(curtime *TimeResp) *dto.Ark {
 		NewArkKObj("#LIST#",
 			NewArkObjKV("desc", curtime.Data.Datetime),
 			NewArkObjKV("desc", curtime.Data.Week)))
+}
+
+//创建世界时间的ark消息
+func CreateArkByGlobalTime(globaltime *GlobaltimeResp) *dto.Ark {
+	return NewArk(23,
+		NewArkKV("#DESC#", "描述"),
+		NewArkKV("#PROMPT#", "提示信息"),
+		NewArkKObj("#LIST#",
+			NewArkObjKV("desc", globaltime.Data.Continent+" "+globaltime.Data.Country+" "+globaltime.Data.City+" "+globaltime.Data.Time_zone),
+			NewArkObjKV("desc", "当地时间："+globaltime.Data.Datetime+" "+globaltime.Data.Week),
+			NewArkObjKV("desc", "北京时间："+globaltime.Data.BJ_datetime)))
+}
+
+//判断字符串是否全是英文
+func StrAllLetter(str string) bool {
+	match, _ := regexp.MatchString(`^[A-Za-z]+$`, str)
+	return match
 }
