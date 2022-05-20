@@ -171,7 +171,8 @@ func ShowCommandManul(cmd string) *dto.Ark {
 		helps = append(helps, NewArkObjKV("desc", "如 /添加日志 刚刚逃了客，旷了考，下午还要继续睡觉..."))
 	case "日志查询":
 		helps = append(helps, NewArkObjKV("desc", "请输入 /日志查询+某一天的日期"))
-		helps = append(helps, NewArkObjKV("desc", "如 /日志查询 2022年05月20日"))
+		helps = append(helps, NewArkObjKV("desc", "如 /日志查询 2022年05月20日 发送私信"))
+		helps = append(helps, NewArkObjKV("desc", "如需公开请输入 /日志查询 2022年05月20日 公开"))
 	case "日志删除":
 		helps = append(helps, NewArkObjKV("desc", "请输入 /日志删除+某一天的日期"))
 		helps = append(helps, NewArkObjKV("desc", "如 /日志删除 2022年05月20日"))

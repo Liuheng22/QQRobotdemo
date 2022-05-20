@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/tencent-connect/botgo"
@@ -110,7 +111,8 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 		}
 		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("成功添加！！！")})
 	case "/日志查询":
-		key, err := CreateKeyforQuery(data.Author.ID, content)
+		s := strings.Split(content, " ")
+		key, err := CreateKeyforQuery(data.Author.ID, s[0])
 		DPrintf("%v", key)
 		if err != nil {
 			log.Println("日志查询错误，err = ", err)
@@ -124,7 +126,11 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 			SourceGuildID: data.GuildID,
 			RecipientID:   data.Author.ID,
 		})
-		api.PostDirectMessage(ctx, directMsg, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateQueryResult(val, content)})
+		if len(s) > 1 && s[1] == "公开" {
+			api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateQueryResult(val, s[0])})
+		} else {
+			api.PostDirectMessage(ctx, directMsg, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateQueryResult(val, s[0])})
+		}
 	case "/日志删除":
 		key, err := CreateKeyforQuery(data.Author.ID, content)
 		if err != nil {
@@ -137,6 +143,7 @@ func atMsghandler(event *dto.WSPayload, data *dto.WSATMessageData) error {
 			return nil
 		}
 		api.PostMessage(ctx, data.ChannelID, &dto.MessageToCreate{MsgID: data.ID, Ark: CreateSuccessArk("成功删除！！！")})
+	case "/撤回":
 	case "/计时":
 	case "/提醒":
 	default:

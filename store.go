@@ -3,8 +3,11 @@ package main
 import "fmt"
 
 type Storerage interface {
+	//获取对应key的所有数据
 	Get(key string) ([]string, error)
+	//添加对应的kv对
 	Put(key string, value string) error
+	//删除对应key的所有数据
 	Del(key string) error
 }
 
